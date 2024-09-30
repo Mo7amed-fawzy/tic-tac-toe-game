@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tic_tac_toe_app/xo_logic.dart';
 
 class XoUi extends StatefulWidget {
   const XoUi({super.key});
@@ -8,8 +9,17 @@ class XoUi extends StatefulWidget {
 }
 
 class _XoUiState extends State<XoUi> {
-  String lastplayes = "X";
+  String lastplayer = "X";
   String res = " ";
+  bool gameOver = false;
+  Game g = Game();
+  List<int> scoreboard = [0, 0, 0, 0, 0, 0, 0, 0];
+  @override
+  void initState() {
+    // اول ما افتح يناديلي علي الفنكشن واحلطها لست فاضيه وارجعها فالبورد
+    super.initState();
+    g.board = g.initgame()!;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +42,7 @@ class _XoUiState extends State<XoUi> {
         children: [
           Center(
             child: Text(
-              'itis $lastplayes turn',
+              'itis $lastplayer turn',
               style: const TextStyle(
                 fontSize: 50,
                 color: Colors.white,
@@ -48,16 +58,45 @@ class _XoUiState extends State<XoUi> {
               crossAxisSpacing: 10,
               padding: const EdgeInsets.all(10),
               children: List.generate(9, (index) {
-                return Container(
-                  decoration: BoxDecoration(
-                      color: Colors.deepPurple,
-                      borderRadius: BorderRadius.circular(16)),
-                  child: const Center(
-                    child: Text(
-                      'فاضيه حليا والله',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                return InkWell(
+                  onTap: gameOver
+                      ? null // لو بتروو رجعلي نل
+                      : () {
+                          if (g.board[index] ==
+                              "") // فحال داس علي العلامه الفاضيه
+                          {
+                            setState(() {
+                              g.board[index] = lastplayer;
+
+                              gameOver = g.winnercheck(index, lastplayer,
+                                  scoreboard); // winner=> 3|-3
+                              if (gameOver) {
+                                res = "$lastplayer is the winner!";
+                              } else if (!g.board.contains("")) {
+                                res = "T3aadol...";
+                              }
+
+                              if (lastplayer == "X") {
+                                lastplayer = "O";
+                              } else {
+                                lastplayer = "X";
+                              }
+                            });
+                          }
+                        },
+                  child: Container(
+                    decoration: BoxDecoration(
+                        color: Colors.deepPurple,
+                        borderRadius: BorderRadius.circular(16)),
+                    child: Center(
+                      child: Text(
+                        g.board[index],
+                        style: TextStyle(
+                            fontSize: 40,
+                            fontWeight: FontWeight.bold,
+                            color: g.board[index] == "X"
+                                ? Colors.lightBlueAccent
+                                : Colors.pinkAccent),
                       ),
                     ),
                   ),
@@ -68,37 +107,42 @@ class _XoUiState extends State<XoUi> {
 
 // الكونتانر بتاعي عاوز اعمل منو لست فهعمل ليستاوفجينيريت
 
-          // Center(
-          //   child: Text(
-          //     'X-O $res Game',
-          //     style: const TextStyle(
-          //       fontSize: 50,
-          //       color: Colors.white,
-          //     ),
-          //   ),
-          // ),
           ,
           const SizedBox(
-            height: 140,
+            height: 30,
+          ),
+          Text(
+            res,
+            style: const TextStyle(
+              fontSize: 40,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(
+            height: 100,
           ),
           ElevatedButton.icon(
             onPressed: () {
-              // Your button press logic here
+              setState(() {
+                lastplayer = "X";
+                res = " ";
+                gameOver = false;
+                scoreboard = [0, 0, 0, 0, 0, 0, 0, 0];
+                g.board = g.initgame()!;
+              });
             },
             icon: const Icon(Icons.replay_rounded,
-                size: 30.0,
-                color: Colors.black), // Adjust size and color as needed
+                size: 30.0, color: Colors.black),
             label: const Text(
               'Repeat The Game',
               style: TextStyle(
-                fontSize: 20, // Adjust font size to fit
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
             ),
             style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 20, vertical: 10), // Adjust padding as needed
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             ),
           ),
         ],
